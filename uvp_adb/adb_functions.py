@@ -471,11 +471,17 @@ class uvp_phone(object):
         self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell screencap -p /sdcard/screen.png")
         self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " pull /sdcard/screen.png")
         self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell rm /sdcard/screen.png")
+        if "Linux" in platform.system():
+            import os 
+            os.rename("screen.png", "/var/tmp/screen.png")
         
     def is_DND_on(self):
         # Before using this function make sure adb connected
-        import png
-        f = open('screen.png', 'rb')
+        import png,os
+        if "Linux" in platform.system():
+            f = open('/var/tmp/screen.png', 'rb')
+        elif "Windows" in platform.system():
+            f = open('screen.png', 'rb')
         r=png.Reader(file=f)
         
         w, h, pixels, metadata = r.read()
@@ -485,6 +491,10 @@ class uvp_phone(object):
             break
         
         f.close()
+        if "Linux" in platform.system():
+            os.remove('/var/tmp/screen.png')
+        elif "Windows" in platform.system():
+            os.remove('screen.png')
         del r
         
         if colour == [255,0,0,255]:

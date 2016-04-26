@@ -30,7 +30,7 @@ def write_log_to_file(text):
     if "Windows" in platform.system():
         logpath = "uvp.log"
     elif "Linux" in platform.system():
-        logpath = "/root/UVP/uvp.log"
+        logpath = "/var/log/uvp.log"
     f = open(logpath,'a')
     f.write(text+"\n")
     f.close()
@@ -39,7 +39,7 @@ def write_error_to_file(text):
     if "Windows" in platform.system() :
 		logpath = "uvp-error.log"
     elif "Linux" in platform.system() :
-		logpath = "/root/UVP/uvp-error.log"
+		logpath = "/var/log/uvp-error.log"
     f = open(logpath,'a')
     f.write(text+"\n")
     f.close()

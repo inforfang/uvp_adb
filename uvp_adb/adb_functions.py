@@ -548,7 +548,10 @@ class uvp_phone(object):
         self.bring_uvp_main_screen()
         time.sleep(5)
         phone_model = self.get_phone_model()
+        maj_uvp_version = self._get_uvp_version ().split('.')[0]
         
+        # Clear UVP setting 
+        self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell pm clear com.ubnt.uvp")
         # Open Setting 
         self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell am force-stop com.ubnt.uvp")
         time.sleep(1)
@@ -556,9 +559,15 @@ class uvp_phone(object):
         time.sleep(1)
         
         if phone_model == "UVP_Executive":
-            # Select controller
-            self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 143 205")
-            time.sleep(1)
+            if maj_uvp_version == '4':
+                # Select controller
+                self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 143 205")
+                time.sleep(1)
+            elif maj_uvp_version == '5':
+                # Select controller
+                self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 111 254")
+                time.sleep(1)
+                
             # Select Controller URL 
             self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 141 248")
             time.sleep(1)
@@ -575,7 +584,13 @@ class uvp_phone(object):
             self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 382 572")
             time.sleep(1)
             self.bring_uvp_main_screen()
-                        
+
             #UVP_log ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
             pass
+    
+    def _get_uvp_version(self):
+        ver = self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell dumpsys package com.ubnt.uvp | grep versionName",shell_on=True).split('=')[1]
+        UVP_log("UVP software version is " + ver)
+        return ver
+        
     

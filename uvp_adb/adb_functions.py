@@ -349,7 +349,7 @@ class uvp_phone(object):
         apk_path = currect_path + apk_dir + filename
         self._validate_file_exist (apk_path)
         
-        shell_output = self._adb_run_shell_command("adb install -r " + apk_path)
+        shell_output = self._adb_run_shell_command("adb -s "+ self.get_ip_and_port() + " install -r " + apk_path)
         
         if "INSTALL_FAILED_VERSION_DOWNGRADE" in shell_output:
             UVP_Warning (filename + " installation failed because your current APK version is outdated.")
@@ -370,7 +370,7 @@ class uvp_phone(object):
         err += self._install_apk("SipService.apk")
         err += self._install_apk("UnifiPhone.apk")
         err += self._install_apk("Google_pdf_reader.apk")
-        err += self._install_apk("Latitude_UVP.apk")
+        #err += self._install_apk("Latitude_UVP.apk")
         err += self._install_apk("MyIP.apk")
         if err == 0:
             UVP_log("Updating completed successfully !")
@@ -540,3 +540,42 @@ class uvp_phone(object):
                 #self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input keyevent 66")
                 UVP_log ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
             
+    def get_mac_address(self):
+        return self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell netcfg | grep eth0 | awk {'print $5'}",shell_on=True)
+
+    def configure_controller(self):
+        import time
+        self.bring_uvp_main_screen()
+        time.sleep(5)
+        phone_model = self.get_phone_model()
+        
+        # Open Setting 
+        self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell am force-stop com.ubnt.uvp")
+        time.sleep(1)
+        self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell am start com.ubnt.uvp/com.ubnt.unifi.phone.SettingsActivity")
+        time.sleep(1)
+        
+        if phone_model == "UVP_Executive":
+            # Select controller
+            self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 143 205")
+            time.sleep(1)
+            # Select Controller URL 
+            self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 141 248")
+            time.sleep(1)
+            # Select text 
+            self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 297 139")
+            time.sleep(1)
+            # Input Text 
+            self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input text http://10.100.105.131:8080/inform")
+            time.sleep(2)
+            # Click Ok
+            self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 655 207")
+            time.sleep(1)
+            # Back Button
+            self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 382 572")
+            time.sleep(1)
+            self.bring_uvp_main_screen()
+                        
+            #UVP_log ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
+            pass
+    

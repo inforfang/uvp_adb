@@ -280,6 +280,9 @@ class uvp_phone(object):
         resultsum += resultsum + self._block_app ("Camera","com.android.camera2")
         resultsum += resultsum + self._block_app ("Setting","com.android.settings")
         
+        #Refresh Launcher
+        self._refresh_launcher()
+        
         if resultsum == 0:
             UVP_log (" ===== Blocking Finished Successfully =====")
             return 0
@@ -591,4 +594,6 @@ class uvp_phone(object):
         UVP_log("UVP software version is " + ver)
         return ver
         
-    
+    def _refresh_launcher (self):
+        UVP_log("Refereshing Launcher is in process")
+        shell_output = self._adb_run_shell_command("adb -s "+ self.get_ip_and_port() + " shell pm clear com.android.launcher3")

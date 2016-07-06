@@ -277,10 +277,8 @@ class uvp_phone(object):
         resultsum += resultsum + self._block_app ("Exchange","com.android.exchange")
         resultsum += resultsum + self._block_app ("Google Services","com.google.android.gms")
         resultsum += resultsum + self._block_app ("Google Voice Search","com.google.android.googlequicksearchbox")
-        
-        input_result = raw_input ("Do you want to block setting menu (yes/no) ?")
-        if input_result == "yes":
-            resultsum += resultsum + self._block_app ("Setting","com.android.settings")
+        resultsum += resultsum + self._block_app ("Camera","com.android.camera2")
+        resultsum += resultsum + self._block_app ("Setting","com.android.settings")
         
         if resultsum == 0:
             UVP_log (" ===== Blocking Finished Successfully =====")

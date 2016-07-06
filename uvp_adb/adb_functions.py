@@ -576,7 +576,7 @@ class uvp_phone(object):
             self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 297 139")
             time.sleep(1)
             # Input Text 
-            self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input text http://10.100.105.131:8080/inform")
+            self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input text http://pbx.tel.local:8080/inform")
             time.sleep(2)
             # Click Ok
             self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 655 207")

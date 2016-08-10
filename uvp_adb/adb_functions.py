@@ -23,15 +23,15 @@ class uvp_phone(object):
             self.apk_path = "\\APKs\\"
         elif "Linux" in platform.system() :
             self.apk_path = "/APKs/"
+        self.uvp_log = uvp_log()
 
-    
     # To set IP for phone - This function will validate if ip is pingable before setting it 
     def set_Phone_IP(self,ip):
         self.Phone_IP = ip
         if self._ip_validation() == 0 :
-            UVP_log ("Phone IP is ONLINE ! ")
+            self.uvp_log.info ("Phone IP is ONLINE ! ")
         else :
-            UVP_error ("IP is not valid, exiting ...")
+            self.uvp_log.error ("IP is not valid, exiting ...")
             return 1 # Return Error => need to exit
     
     # To set ADB path - This function will validate path to see if adb.exe exists or not
@@ -39,7 +39,7 @@ class uvp_phone(object):
         if self._adb_path_validation() == 0 :    
             self.adb_path = path
         else :
-            UVP_error ("ADB Path incorrect, exiting ...")
+            self.uvp_log.error ("ADB Path incorrect, exiting ...")
             return 1 # Return Error => need to exit
 
     # To APKs path for updating phones 
@@ -71,27 +71,27 @@ class uvp_phone(object):
         # ADB daemon should run under supervisorctl 
         shell_output = self._adb_run_shell_command("pgrep adb")
         if shell_output == "":
-            UVP_error ("ADB daemon is not running...")
-            UVP_Warning ("ADB daemon is not running...")
-            UVP_log ("Trying to start ADB daemon...")
+            self.uvp_log.error ("ADB daemon is not running...")
+            self.uvp_log.warning ("ADB daemon is not running...")
+            self.uvp_log.info ("Trying to start ADB daemon...")
             shell_output = self._adb_run_shell_command("sudo adb start-server")
             if "daemon started successfully" in shell_output:
-                UVP_log ("Daemon started successfully!")
+                self.uvp_log.info ("Daemon started successfully!")
             else :
-                UVP_error ("Can't start ADB daemon on this server")
+                self.uvp_log.error ("Can't start ADB daemon on this server")
                 return 1 
 
     def restart_adb_daemon(self):
-        UVP_log ("Killing ADB daemon...")
+        self.uvp_log.info ("Killing ADB daemon...")
         shell_output = self._adb_run_shell_command("adb kill-server")
         self.check_adb_daemon()
                 
     def try_socket_first (self):
-        UVP_log("Testing socket to connect to Phone (" + self.get_Phone_IP() + ")")
+        self.uvp_log.info("Testing socket to connect to Phone (" + self.get_Phone_IP() + ")")
         if self._run_socket_test() == 0:
-            UVP_log ("Connection to "+ self.get_Phone_IP() + " via port ("+str(self.ADB_PORT)+") is alive!")
+            self.uvp_log.info ("Connection to "+ self.get_Phone_IP() + " via port ("+str(self.ADB_PORT)+") is alive!")
         else :
-            UVP_error ("Connection to phone "+self.get_Phone_IP() + " via port ("+str(self.ADB_PORT)+") is rejected. \nMake sure IP address is correct. Then check for developer options to be on. Then check network Jitter and firewall port block")
+            self.uvp_log.error ("Connection to phone "+self.get_Phone_IP() + " via port ("+str(self.ADB_PORT)+") is rejected. \nMake sure IP address is correct. Then check for developer options to be on. Then check network Jitter and firewall port block")
             return 1 # Return Error => need to exit 
 
         
@@ -101,12 +101,12 @@ class uvp_phone(object):
     # So if port 5555 is closed to blocked by firewall or network is too slow or with high jitter it will consider
     # port 555 is closed. Look for timeout option in _check_socket() function.
     def adb_connect(self):
-        UVP_log("ADB trying to connect to Phone (" + self.get_Phone_IP() + ")")
+        self.uvp_log.info("ADB trying to connect to Phone (" + self.get_Phone_IP() + ")")
         shell_output = self._adb_run_shell_command("adb connect "+ self.get_Phone_IP())
         import time
         time.sleep(1)
         if "unable to connect" in shell_output :
-            UVP_error ("Can't connect to phone (" + self.get_Phone_IP() + ") ...")
+            self.uvp_log.error ("Can't connect to phone (" + self.get_Phone_IP() + ") ...")
             return 1 # Return Error => need to exit
             
           
@@ -115,7 +115,7 @@ class uvp_phone(object):
         adb_path = self.get_adb_path()
         phone_ip = self.get_Phone_IP()
         shell_output = self._adb_run_shell_command("adb disconnect "+str(phone_ip))
-        UVP_log("ADB is disconnecting ...")
+        self.uvp_log.info("ADB is disconnecting ...")
     
     # Try to connect 3 times after find device disconnected
     def try_to_connect_if_offline (self):
@@ -128,13 +128,13 @@ class uvp_phone(object):
                     out = line
                     if "offline" in out :
                         count += 1
-                        UVP_log("Retrying to connect to phone ... Try "+ str(count))
+                        self.uvp_log.info("Retrying to connect to phone ... Try "+ str(count))
                         self.adb_disconnect()
                         self.adb_connect()
                         #shell_output = self._adb_run_shell_command("adb connect "+ self.get_Phone_IP())
                     elif "unknown" in out :
                         count += 1
-                        UVP_log("Trying to connect to phone ... Try "+ str(count))
+                        self.uvp_log.info("Trying to connect to phone ... Try "+ str(count))
                         self.adb_disconnect()
                         self.adb_connect()
                         #shell_output = self._adb_run_shell_command("adb connect "+ self.get_Phone_IP())
@@ -142,7 +142,7 @@ class uvp_phone(object):
                         return 0
                     time.sleep(1)
 
-        UVP_error ("Can't connect to phone with ip ("+self.get_Phone_IP()+") after 3 tries. It seems it is offline")
+        self.uvp_log.error ("Can't connect to phone with ip ("+self.get_Phone_IP()+") after 3 tries. It seems it is offline")
         self.adb_disconnect()
         return 1 # Return Error => need to exit
 
@@ -164,9 +164,9 @@ class uvp_phone(object):
             import os.path
             if os.path.isfile (input_result2+"\\adb.exe") == True :
                 self.set_adb_path(input_result2)
-                UVP_log ("ADB Path is correct and accessable")
+                self.uvp_log.info ("ADB Path is correct and accessable")
             else :
-                UVP_error ("adb.exe file is not accessible or does not exist")
+                self.uvp_log.error ("adb.exe file is not accessible or does not exist")
                 self.adb_disconnect()
 
     # This function asks user to input APK path 
@@ -188,10 +188,10 @@ class uvp_phone(object):
             else :
                 import os.path
                 if os.path.isfile (adb_path+"\\adb.exe") == True :
-                    UVP_log ("ADB Path is correct and accessable")
+                    self.uvp_log.info ("ADB Path is correct and accessable")
                     return 0
                 else :
-                    UVP_error ("adb.exe file is not accessible or does not exist")
+                    self.uvp_log.error ("adb.exe file is not accessible or does not exist")
                     return 1
         else :
             return 0
@@ -208,43 +208,43 @@ class uvp_phone(object):
         Phone_IP = self.get_Phone_IP()
         output = self._ping_result()
         if "destination host unreachable" in output.decode('utf-8').lower() :
-            #UVP_error ("Phone IP is NOT accessible ! ")
+            #self.uvp_log.error ("Phone IP is NOT accessible ! ")
             return 1
         elif "timed out" in output.decode('utf-8').lower():
-            #UVP_error ("Phone IP is NOT accessible ! ")
+            #self.uvp_log.error ("Phone IP is NOT accessible ! ")
             return 1
         elif "Please check the name and try again" in output.decode('utf-8') or "Bad option" in output.decode('utf-8') or "Invalid argument" in output.decode('utf-8'):
-            #UVP_error ( "Please check phone IP address entered. -> ")
+            #self.uvp_log.error ( "Please check phone IP address entered. -> ")
             return 1 
         else:
-            #UVP_log ("Phone IP is ONLINE ! ")
+            #self.uvp_log.info ("Phone IP is ONLINE ! ")
             return 0
      
     def _block_app (self, pkg_name, pkg):
         adb_path = self.get_adb_path()
                
-        UVP_log("Blocking " + pkg_name + " is in process")
+        self.uvp_log.info("Blocking " + pkg_name + " is in process")
         shell_output = self._adb_run_shell_command("adb -s "+ self.get_ip_and_port() + " shell pm block " + pkg)
         if shell_output[0] == "*" or shell_output[0:4] == "error":
-            UVP_Warning ("Connection Error - Device disconnected")
+            self.uvp_log.warning ("Connection Error - Device disconnected")
             return 2
         result = shell_output.split(": ")
         if result[1] == "false\r\r\n":
-            UVP_Warning ("Error Blocking " + pkg_name)
+            self.uvp_log.warning ("Error Blocking " + pkg_name)
             return 1 
         return 0
     
     def _unblock_app (self, pkg_name, pkg):
         adb_path = self.get_adb_path()    
                
-        UVP_log("Unblocking " + pkg_name + " is in process")
+        self.uvp_log.info("Unblocking " + pkg_name + " is in process")
         shell_output = self._adb_run_shell_command("adb -s "+ self.get_ip_and_port() + " shell pm unblock " + pkg)
         if shell_output[0] == "*" or shell_output[0:4] == "error":
-            UVP_Warning ("Connection Error - Device disconnected")
+            self.uvp_log.warning ("Connection Error - Device disconnected")
             return 2
         result = shell_output.split(": ")
         if result[1] == "true\r\r\n":
-            UVP_Warning ("Error Unblocking " + pkg_name)
+            self.uvp_log.warning ("Error Unblocking " + pkg_name)
             return 1 
         return 0
     
@@ -284,10 +284,10 @@ class uvp_phone(object):
         self._refresh_launcher()
         
         if resultsum == 0:
-            UVP_log (" ===== Blocking Finished Successfully =====")
+            self.uvp_log.info (" ===== Blocking Finished Successfully =====")
             return 0
         else:
-            UVP_Warning (" Blocking Finished with Errors . One or more apps didn't blocked successfully. To make please sure check the phone. If warning is because of Google Services App . Make sure to login to Google Setting and disable all of options. Location and data sending should be desabled. These setting are configred in Startup configuration of device.Try to disable those options and try again.")
+            self.uvp_log.warning (" Blocking Finished with Errors . One or more apps didn't blocked successfully. To make please sure check the phone. If warning is because of Google Services App . Make sure to login to Google Setting and disable all of options. Location and data sending should be desabled. These setting are configred in Startup configuration of device.Try to disable those options and try again.")
             return 1
     
     
@@ -324,10 +324,10 @@ class uvp_phone(object):
         resultsum += resultsum + self._unblock_app ("Setting","com.android.settings")
         
         if resultsum == 0:
-            UVP_log (" ===== Unblocking Finished Successfully =====")
+            self.uvp_log.info (" ===== Unblocking Finished Successfully =====")
             return 0
         else:
-            UVP_Warning (" Unblocking Finished with Errors")
+            self.uvp_log.warning (" Unblocking Finished with Errors")
             return 1
     
     # Check if adb.exe exists or not 
@@ -335,16 +335,16 @@ class uvp_phone(object):
         import os.path
         if os.path.isfile (filepath) == True :
             return 0
-            UVP_log (filepath + " path is correct and accessable")
+            self.uvp_log.info (filepath + " path is correct and accessable")
         else :
-            UVP_error (filepath + " is not accessible or does not exist")
+            self.uvp_log.error (filepath + " is not accessible or does not exist")
             return 1 
             self.adb_disconnect()
     
     def _install_apk (self,filename):
         adb_path = self.get_adb_path()
         apk_dir = self.get_apk_path()
-        UVP_log("Installing " + filename + " is in process ...")
+        self.uvp_log.info("Installing " + filename + " is in process ...")
         import os.path
         currect_path = os.getcwd()
         apk_path = currect_path + apk_dir + filename
@@ -353,20 +353,20 @@ class uvp_phone(object):
         shell_output = self._adb_run_shell_command("adb -s "+ self.get_ip_and_port() + " install -r " + apk_path)
         
         if "INSTALL_FAILED_VERSION_DOWNGRADE" in shell_output:
-            UVP_Warning (filename + " installation failed because your current APK version is outdated.")
-            UVP_Warning ("Please download lastest version from (http://dl.ubnt.com/unifi/static/uvp/"+filename+") and put in APKs folder.")
-            UVP_Warning ("Also it might happen when your phone already is upgraded with Controller.")
+            self.uvp_log.warning (filename + " installation failed because your current APK version is outdated.")
+            self.uvp_log.warning ("Please download lastest version from (http://dl.ubnt.com/unifi/static/uvp/"+filename+") and put in APKs folder.")
+            self.uvp_log.warning ("Also it might happen when your phone already is upgraded with Controller.")
             return 1 
         elif "Success" not in shell_output: 
-            UVP_error (filename + " installation failed with unknown errors : (See Below)")
+            self.uvp_log.error (filename + " installation failed with unknown errors : (See Below)")
             print shell_output
             return 1
         else :
-            UVP_log (filename + " has been installed successfully")
+            self.uvp_log.info (filename + " has been installed successfully")
             return 0 
     
     def update_phone_with_apks(self):
-        UVP_log("Updating process starting !")
+        self.uvp_log.info("Updating process starting !")
         err= 0
         err += self._install_apk("SipService.apk")
         err += self._install_apk("UnifiPhone.apk")
@@ -375,9 +375,9 @@ class uvp_phone(object):
         #err += self._install_apk("Latitude_UVP.apk")
         err += self._install_apk("MyIP.apk")
         if err == 0:
-            UVP_log("Updating completed successfully !")
+            self.uvp_log.info("Updating completed successfully !")
         else :
-            UVP_Warning ("Updating finished with errors ...")
+            self.uvp_log.warning ("Updating finished with errors ...")
 
     
     def get_ip_and_port(self):
@@ -390,9 +390,9 @@ class uvp_phone(object):
         shell_output = self._adb_run_shell_command("adb -s "+ self.get_ip_and_port() + " shell pm clear com.android.providers.contacts")
         
         if "Success" not in shell_output:
-            UVP_log ("Clearing call history of "+PHONE_IP+ " Failed!")
+            self.uvp_log.info ("Clearing call history of "+PHONE_IP+ " Failed!")
             return 1
-        UVP_log ("Clearing call history of "+PHONE_IP+ " was successfull!")
+        self.uvp_log.info ("Clearing call history of "+PHONE_IP+ " was successfull!")
     
     def bring_latitude_app (self):
         PHONE_IP = self.get_Phone_IP()
@@ -402,10 +402,10 @@ class uvp_phone(object):
         shell_output = self.adb_connect()
         shell_output = self._adb_run_shell_command("adb -s "+ self.get_ip_and_port() + " shell am start -n com.percipia.latitude/.MainActivity")
         if "Error" in shell_output:
-            UVP_log ("Bringing up Latitute app on "+PHONE_IP+ " failed!")
+            self.uvp_log.info ("Bringing up Latitute app on "+PHONE_IP+ " failed!")
             shell_output = self.adb_disconnect()
             return 1 
-        UVP_log ("Bringing up Latitute app on "+PHONE_IP+ " was successfull!")
+        self.uvp_log.info ("Bringing up Latitute app on "+PHONE_IP+ " was successfull!")
         shell_output = self.adb_disconnect()
         return 0
     
@@ -455,7 +455,7 @@ class uvp_phone(object):
     # Increase timeout and check respond time and use it in check_socket() as timeout.
     def _run_socket_test (self) :
         TIMEOUT,intruption = self._phone_ping_respond_time()
-        UVP_log ("Network timeout is set as : "+str(TIMEOUT*1.5)+" ms")
+        self.uvp_log.info ("Network timeout is set as : "+str(TIMEOUT*1.5)+" ms")
         result = self._check_socket (TIMEOUT*1.5)
         if result == 0:
             return 0     #successfull
@@ -500,17 +500,17 @@ class uvp_phone(object):
         del r
         
         if colour == [255,0,0,255]:
-            UVP_log ("For "+ self.get_Phone_IP()+"-> DND is on ")
+            self.uvp_log.info ("For "+ self.get_Phone_IP()+"-> DND is on ")
             return True
         else :
-            UVP_log ("For "+ self.get_Phone_IP()+"-> DND is off ")
+            self.uvp_log.info ("For "+ self.get_Phone_IP()+"-> DND is off ")
             return False
     
     def get_phone_model(self):
         out =  self._adb_run_shell_command ("adb devices -l")
         phone_model = out.split('model:')[1].split(' ')[0]
         #print phone_model
-        UVP_log ("Phone model for "+ self.get_Phone_IP()+" is "+phone_model)
+        self.uvp_log.info ("Phone model for "+ self.get_Phone_IP()+" is "+phone_model)
         if phone_model == "UVP":
             return "UVP"
         elif phone_model == "UVP_Executive":
@@ -530,7 +530,7 @@ class uvp_phone(object):
             if phone_model == "UVP_Executive":
                 self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 1000 60")
                 self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 915 173")
-                UVP_log ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
+                self.uvp_log.info ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
 
             elif phone_model == "UVP":
                 self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 600 100")
@@ -540,7 +540,7 @@ class uvp_phone(object):
                 #self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input keyevent 66")
                 #self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input keyevent 20")
                 #self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input keyevent 66")
-                UVP_log ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
+                self.uvp_log.info ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
             
     def get_mac_address(self):
         return self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell netcfg | grep eth0 | awk {'print $5'}",shell_on=True)
@@ -587,14 +587,14 @@ class uvp_phone(object):
             time.sleep(1)
             self.bring_uvp_main_screen()
 
-            #UVP_log ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
+            #self.uvp_log.info ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
             pass
     
     def _get_uvp_version(self):
         ver = self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell dumpsys package com.ubnt.uvp | grep versionName",shell_on=True).split('=')[1]
-        UVP_log("UVP software version is " + ver)
+        self.uvp_log.info("UVP software version is " + ver)
         return ver
         
     def _refresh_launcher (self):
-        UVP_log("Refereshing Launcher is in process")
+        self.uvp_log.info("Refereshing Launcher is in process")
         shell_output = self._adb_run_shell_command("adb -s "+ self.get_ip_and_port() + " shell pm clear com.android.launcher3")

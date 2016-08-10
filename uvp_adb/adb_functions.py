@@ -370,7 +370,7 @@ class uvp_phone(object):
         err= 0
         err += self._install_apk("SipService.apk")
         err += self._install_apk("UnifiPhone.apk")
-        err += self._install_apk("Tr069Service.apk")
+        #err += self._install_apk("Tr069Service.apk")
         err += self._install_apk("Google_pdf_reader.apk")
         #err += self._install_apk("Latitude_UVP.apk")
         err += self._install_apk("MyIP.apk")

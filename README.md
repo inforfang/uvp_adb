@@ -28,6 +28,14 @@ phone.clear_history()
 phone.adb_disconnect()
 
 ```
+## DND 
+Since in Ubiquiti phones DND is not controlled by PBX and user can turn it on/off independently, sometimes administrator needs to turn it off (in case of emergency for example). Also 
+because there is no API for Ubiquiti phone to do so, I used image processing method to know if DND is on or off (hard way !!! ;-))  and then it uses adb methods to turn it off ! you 
+can use function below to turn the DND off.
+
+```python
+phone.turn_off_dnd()
+```
 
 # Development 
 To help development you can clone the repository by : 

@@ -31,7 +31,7 @@ class uvp_phone(object):
         if self._ip_validation() == 0 :
             self.uvp_log.info ("Phone IP is ONLINE ! ")
         else :
-            self.uvp_log.error ("IP is not valid, exiting ...")
+            self.uvp_log.error ("IP is not valid, setting IP failed.")
             return 1 # Return Error => need to exit
     
     # To set ADB path - This function will validate path to see if adb.exe exists or not
@@ -39,7 +39,7 @@ class uvp_phone(object):
         if self._adb_path_validation() == 0 :    
             self.adb_path = path
         else :
-            self.uvp_log.error ("ADB Path incorrect, exiting ...")
+            self.uvp_log.error ("ADB Path incorrect, setting ADB path failed.")
             return 1 # Return Error => need to exit
 
     # To APKs path for updating phones 
@@ -217,7 +217,7 @@ class uvp_phone(object):
             self.uvp_log.error ("Network error > Please check phone IP address entered. -> "+ Phone_IP)
             return 1 
         else:
-            self.uvp_log.info ("Phone IP is ONLINE ! ")
+            #self.uvp_log.info ("Phone IP is ONLINE ! ")
             return 0
      
     def _block_app (self, pkg_name, pkg):

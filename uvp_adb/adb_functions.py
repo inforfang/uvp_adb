@@ -208,16 +208,16 @@ class uvp_phone(object):
         Phone_IP = self.get_Phone_IP()
         output = self._ping_result()
         if "destination host unreachable" in output.decode('utf-8').lower() :
-            #self.uvp_log.error ("Phone IP is NOT accessible ! ")
+            self.uvp_log.error ("Network error > Phone IP is NOT unreachable ! ")
             return 1
         elif "timed out" in output.decode('utf-8').lower():
-            #self.uvp_log.error ("Phone IP is NOT accessible ! ")
+            self.uvp_log.error ("Network error > Phone IP is NOT accessible ! (timeout)")
             return 1
         elif "Please check the name and try again" in output.decode('utf-8') or "Bad option" in output.decode('utf-8') or "Invalid argument" in output.decode('utf-8'):
-            #self.uvp_log.error ( "Please check phone IP address entered. -> ")
+            self.uvp_log.error ("Network error > Please check phone IP address entered. -> "+ Phone_IP)
             return 1 
         else:
-            #self.uvp_log.info ("Phone IP is ONLINE ! ")
+            self.uvp_log.info ("Phone IP is ONLINE ! ")
             return 0
      
     def _block_app (self, pkg_name, pkg):
@@ -530,7 +530,7 @@ class uvp_phone(object):
             if phone_model == "UVP_Executive":
                 self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 1000 60")
                 self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 915 173")
-                self.uvp_log.info ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
+                self.uvp_log.info ("DND has been turned off for " + phone_model + "("+ self.get_Phone_IP() +")")
 
             elif phone_model == "UVP":
                 self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input tap 600 100")
@@ -540,7 +540,7 @@ class uvp_phone(object):
                 #self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input keyevent 66")
                 #self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input keyevent 20")
                 #self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell input keyevent 66")
-                self.uvp_log.info ("DND has been truned off on for " + phone_model + "("+ self.get_Phone_IP() +")")
+                self.uvp_log.info ("DND has been turned off for " + phone_model + "("+ self.get_Phone_IP() +")")
             
     def get_mac_address(self):
         return self._adb_run_shell_command ("adb -s "+ self.get_ip_and_port() + " shell netcfg | grep eth0 | awk {'print $5'}",shell_on=True)

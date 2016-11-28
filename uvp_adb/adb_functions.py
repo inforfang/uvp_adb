@@ -371,6 +371,14 @@ class uvp_phone(object):
             self.uvp_log.info (filename + " has been installed successfully")
             return 0 
     
+    def install_apk_app(self,apk_filename):
+        self.uvp_log.info("Start of installation of "+apk_filename+" on "+self.Phone_IP)
+        err += self._install_apk(apk_filename)
+        if err == 0:
+            self.uvp_log.info("Installation completed successfully !")
+        else :
+            self.uvp_log.warning ("Installation finished with errors ...")        
+    
     def update_phone_with_apks(self):
         self.uvp_log.info("Updating process starting !")
         err= 0

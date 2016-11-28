@@ -373,7 +373,7 @@ class uvp_phone(object):
     
     def install_apk_app(self,apk_filename):
         self.uvp_log.info("Start of installation of "+apk_filename+" on "+self.Phone_IP)
-        err += self._install_apk(apk_filename)
+        err = self._install_apk(apk_filename)
         if err == 0:
             self.uvp_log.info("Installation completed successfully !")
         else :

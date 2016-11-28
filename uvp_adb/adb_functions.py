@@ -377,7 +377,8 @@ class uvp_phone(object):
         if err == 0:
             self.uvp_log.info("Installation completed successfully !")
         else :
-            self.uvp_log.warning ("Installation finished with errors ...")        
+            self.uvp_log.warning ("Installation finished with errors ...")
+        return err
     
     def update_phone_with_apks(self):
         self.uvp_log.info("Updating process starting !")

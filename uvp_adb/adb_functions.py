@@ -365,7 +365,7 @@ class uvp_phone(object):
             return 1 
         elif "Success" not in shell_output: 
             self.uvp_log.error (filename + " installation failed with unknown errors : (See Below)")
-            print shell_output
+            self.uvp_log.error (shell_output)
             return 1
         else :
             self.uvp_log.info (filename + " has been installed successfully")

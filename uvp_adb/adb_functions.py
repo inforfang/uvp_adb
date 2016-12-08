@@ -66,7 +66,13 @@ class uvp_phone(object):
         output = p.communicate()[0]
         p.wait()
         return output
-        
+
+    def _adb_run_shell_command_without_wait(self,command,shell_on=False):
+        import subprocess
+        if shell_on == False:
+            command = command.split()
+        p = subprocess.Popen(command , shell=shell_on, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
     def check_adb_daemon(self):
         # ADB daemon should run under supervisorctl 
         shell_output = self._adb_run_shell_command("pgrep adb")
@@ -613,3 +619,6 @@ class uvp_phone(object):
     def _refresh_launcher (self):
         self.uvp_log.info("Refereshing Launcher is in process")
         shell_output = self._adb_run_shell_command("adb -s "+ self.get_ip_and_port() + " shell pm clear com.android.launcher3")
+
+    def phone_reboot(self):
+        self._adb_run_shell_command_without_wait("adb -s "+ self.get_ip_and_port() + " reboot")

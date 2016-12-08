@@ -72,6 +72,7 @@ class uvp_phone(object):
         if shell_on == False:
             command = command.split()
         p = subprocess.Popen(command , shell=shell_on, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output = p.communicate()[0]
 
     def check_adb_daemon(self):
         # ADB daemon should run under supervisorctl 
@@ -621,4 +622,5 @@ class uvp_phone(object):
         shell_output = self._adb_run_shell_command("adb -s "+ self.get_ip_and_port() + " shell pm clear com.android.launcher3")
 
     def phone_reboot(self):
+        self.uvp_log.info("Rebooting phone on "+self.get_ip_and_port())
         self._adb_run_shell_command_without_wait("adb -s "+ self.get_ip_and_port() + " reboot")

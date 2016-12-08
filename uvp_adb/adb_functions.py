@@ -72,7 +72,8 @@ class uvp_phone(object):
         if shell_on == False:
             command = command.split()
         p = subprocess.Popen(command , shell=shell_on, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output = p.communicate()[0]
+        import time
+        time.sleep(1)
 
     def check_adb_daemon(self):
         # ADB daemon should run under supervisorctl 

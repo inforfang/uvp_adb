@@ -289,6 +289,7 @@ class uvp_phone(object):
         resultsum += resultsum + self._block_app ("Clock","com.android.deskclock")
         resultsum += resultsum + self._block_app ("Calculator","com.android.calculator2")
         resultsum += resultsum + self._block_app ("Contacts","com.android.contacts")
+        resultsum += resultsum + self._block_app ("File Manager","com.cyanogenmod.filemanager")        
         resultsum += resultsum + self._block_app ("Setting","com.android.settings")
         
         #Refresh Launcher
@@ -335,6 +336,7 @@ class uvp_phone(object):
         resultsum += resultsum + self._unblock_app ("Clock","com.android.deskclock")
         resultsum += resultsum + self._unblock_app ("Calculator","com.android.calculator2")
         resultsum += resultsum + self._unblock_app ("Contacts","com.android.contacts")
+        resultsum += resultsum + self._unblock_app ("File Manager","com.cyanogenmod.filemanager")  
         resultsum += resultsum + self._unblock_app ("Setting","com.android.settings")
         
         if resultsum == 0:
